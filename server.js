@@ -1,5 +1,7 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
+const { Parser } = require('json2csv');
+const fs = require('fs');
 
 const app = express();
 
@@ -7,6 +9,8 @@ app.use(express.json());
 
 
 let tasks = [];
+
+
 
 // Get Tasks
 app.get('/',(req,res) => {
@@ -38,6 +42,19 @@ app.patch('/:taskId',(req,res) => {
 app.delete('/:taskId',(req,res) => {
   tasks = tasks.filter(item => item.id !== req.params.taskId)
   res.send(tasks)
+})
+
+// extract json to csv
+app.get('/getCSV',(req,res)=> {
+  try {
+    const data = tasks;
+    const opts = {data};
+    const parser = new Parser(opts);
+    const csv = parser.parse(data);
+    res.send(csv);
+  } catch (err) {
+    console.error(err);
+  }
 })
 
 const port = process.env.PORT || 5000;
